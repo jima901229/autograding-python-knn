@@ -24,6 +24,11 @@ def knn_calc_dists(xTrain, xTest, k):
     """
     indices = np.random.rand(xTrain.shape[0], xTest.shape[0])
     distances = np.random.rand(xTrain.shape[0], xTest.shape[0])
+    distances = -2 * xTrain@xTest.T + np.sum(xTest**2,axis=1) + np.sum(xTrain**2,axis=1)[:, np.newaxis]
+    distances[distances < 0] = 0
+    distances = distances**.5
+    indices = np.argsort(distances, 0) #get indices of sorted items
+    distances = np.sort(distances,0) #distances sorted in axis 0
     return indices[0:k, : ], distances[0:k, : ]
 
 def knn_predict(xTrain, yTrain, xTest, k=3):
@@ -37,10 +42,17 @@ def knn_predict(xTrain, yTrain, xTest, k=3):
         predictions = predicted labels, ie preds(i) is the predicted label of xTest(i,:)
     """
     indices, distances = knn_calc_dists(xTrain, xTest, k)
+    yTrain = yTrain.flatten()
     rows, columns = indices.shape
     predictions = []
     for j in range(columns):
-        predictions.append(['N/A'])
+        
+        temp = list()
+        for i in range(rows):
+            cell = indices[i][j]
+            temp.append(yTrain[cell])
+        predictions.append(max(temp,key=temp.count)) #this is the key function, brings the mode value
+    
     
     return np.array(predictions)
 
@@ -71,4 +83,4 @@ if __name__ == "__main__":
     # Calculate accuracy
     result = predictions == test_label
     accuracy = sum(result == True) / len(result)
-    print('Evaluate KNN(K=%d) on Iris Flower dataset. Accuracy = %.2f' % (args.K, accuracy))
+    print('Evaluate KNN(K=%d) on Iris Flower dataset. Accuracy = %.2f' % (args.K, accuracy[0]))
