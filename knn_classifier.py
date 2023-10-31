@@ -40,7 +40,13 @@ def knn_predict(xTrain, yTrain, xTest, k=3):
     rows, columns = indices.shape
     predictions = []
     for j in range(columns):
-        predictions.append(['N/A'])
+        
+        temp = list()
+        for i in range(rows):
+            cell = indices[i][j]
+            temp.append(yTrain[cell])
+        predictions.append(max(temp,key=temp.count)) #this is the key function, brings the mode value
+    
     
     return np.array(predictions)
 
